@@ -109,25 +109,94 @@ class CommandPrompt
     end
   end
 
-  def print_q
-    if @queue != []
-    puts "ID".ljust(8) + " LAST NAME".ljust(12) + " FIRST NAME".ljust(12) +
-    " EMAIL".ljust(35) + " ZIPCODE".ljust(12) + " CITY".ljust(10) +
-    " STATE".ljust(10) + " ADDRESS".ljust(10) + " PHONE".ljust(10)
-    end
-    @queue.each do |person| 
-      puts [person.id.to_s.ljust(8), person.last_name.to_s.ljust(12),
-        person.first_name.to_s.ljust(12), person.email.to_s.ljust(35),
-        person.zipcode.to_s.ljust(12), person.city.to_s.ljust(10), person.state.to_s.ljust(10),
-        person.address.to_s.ljust(10), person.phone.to_s.ljust(10)].join(" ")
-    end
+############################################### table & print ###########################################
+  def gutter
+    8
+  end
 
+  def fields
+    %w{id last_name first_name email zipcode city state address phone}
+  end
+
+  def column_widths(fields)
+    widths = {}
+    fields.each do |field|
+      widths[field.downcase] = longest_value(field.downcase) + gutter
+    end
+    widths
+  end
+
+  def longest_value(field)
+    value = []
+    @queue.each do |person|
+    value << person[field].length
+      end
+      value.max
+  end
+
+  def print_header(column_widths)
+    puts "\n"
+    puts "-"*155
+    # puts column_widths.class
+    print "ID".ljust(column_widths["id"])
+    print "LAST NAME".ljust(column_widths["last_name"])
+    print "FIRST NAME".ljust(column_widths["first_name"])
+    print " EMAIL".ljust(column_widths["email"])
+    print "ZIPCODE".ljust(column_widths["zipcode"])
+    print "CITY".ljust(column_widths["city"])
+    print "STATE".ljust(column_widths["state"])
+    print "ADDRESS".ljust(column_widths["address"])
+    print "PHONE".ljust(column_widths["phone"])
+    puts "-"*155
+    puts "\n"
+  end
+
+  def print_person(person, column_widths)
+    puts [ 
+    person.id.ljust(column_widths["id"]),
+    person.last_name.ljust(column_widths["last_name"]),
+    person.first_name.ljust(column_widths["last_name"]),
+    person.email.ljust(column_widths["email"]),
+    person.zipcode.ljust(column_widths["zipcode"]),
+    person.city.ljust(column_widths["city"]),
+    person.state.ljust(column_widths["state"]),
+    person.address.ljust(column_widths["address"]),
+    person.phone.ljust(column_widths["phone"])
+    ].join(" ")
   end
 
   def sort_q(attribute)
     @queue = @queue.sort {|attendee1, attendee2| attendee1.send(attribute.to_sym) <=> attendee2.send(attribute.to_sym)}
     print_q
   end
+
+  def print_q
+    column_widths = column_widths(fields)
+    print_header(column_widths)
+    @queue.each do |person|
+      print_person(person, column_widths)
+    end
+  end
+
+  # def print_q
+  #   column_widths = column_widths(fields)
+  #   print_header(column_widths)
+  #   count = 0
+  #   q_size = @queue.size
+  #   @queue.each do |person|
+  #     if (count != 0) && (count % 10 == 0)
+  #       puts "Displaying records #{count - 10} - #{count} of #{q_size}"
+  #       input = ""
+  #       while input != "\n"
+  #         puts "press space bar or the enter key to show the next set of records"
+  #         input = gets
+  #         end
+  #       end
+  #     print_person
+  #   end
+  # end
+
+  ###############################################
 
   def find(attribute, criteria)    
     @queue = @attendees.select {|attendee| attendee.send(attribute).downcase == criteria.downcase}    
